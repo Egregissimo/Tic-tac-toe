@@ -1,0 +1,165 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[italian, english]{babel}
+\usepackage[pages=some]{background}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\graphicspath{ {./imgs/} }
+\backgroundsetup{
+	firstpage = {true},
+	placement = {center},
+	position = current page.center,
+	contents = {\includegraphics[scale=0.07]{unipd}},
+	angle = {0},
+	opacity = {0.03}
+}
+\hypersetup{
+	colorlinks=true,      
+	urlcolor=blue,
+	linkcolor=black
+}
+
+\newcommand{\tic}{tic-tac-toe}
+\newcommand{\comp}[1]{$\mathcal{O}(#1)$}
+\newcommand{\image}[4]{
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=#1\textwidth]{#2}
+		\caption{#3.}
+		\label{#4}
+	\end{figure}
+}
+
+\title{Intelligenza Artificiale\\ Agente per il gioco \tic}
+\author{Nicola Carlesso (1237782) \and Niccolò Vettorello}
+\date{a.a. 2019/2020}
+
+\begin{document}
+	
+	\begin{titlepage}
+		\maketitle
+		\BgThispage
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\begin{abstract}
+		In tale documento mostreremo come sono stati sviluppati i due agenti per giocare a \tic, rispettivamente coi linguaggi \textit{Haskell v.3.8.8} da Nicola Carlesso e in \textit{Python v.3.8} da Niccolò Vettorello. Infine evidenzieremo le principali caratteristiche tra i due.
+	\end{abstract}
+
+\section{Introduzione}
+Tic-tac-toe è un gioco deterministico ad informazione completa, infatti nel gioco non è presente alcun elemento di casualità ed ogni giocatore è a conoscenza di tutto ciò che avviene nella nella griglia di gioco.
+
+Un agente, per poter giocare a \tic, deve utilizzare l'algoritmo \texttt{Minimax $\alpha-\beta$ pruning}
+
+\subsection{Algoritmo Minimax $\alpha-\beta$ pruning}
+Tale algoritmo utilizza come struttura dati un albero n-ario dove in ogni nodo è presente uno stato del gioco, nel contesto del gioco \tic sono tutte le possibili griglie creabili. La radice di quest'albero è, rimanendo nell'esempio di \tic, la griglia vuota. Ogni livello di profondità dell'albero contiene tutte le possibili configurazioni dopo che il giocatore A o B hanno effettuato una mossa, come mostrato in Figura~\ref{tree}.
+
+\image{0.5}{tree}{Esempio di albero nell'algorimo \texttt{Minimax}}{tree}
+
+Supponendo che il computer sia il giocatore A, l'algoritmo \texttt{Minimax}, esplorando sempre pù in profondità l'albero, assegnerà ad ogni livello in cui sono presenti le mosse di A con \texttt{MAX}, ed i livelli dell'albero con le mosse di B con l'etichetta \texttt{MIN}. Questo perché vuole calcolare il massimo vantaggio quando muove A ed il minimo svantaggio quando muove B.
+
+Alle configurazioni finali (le foglie dell'albero) viene poi assegnato un valore di utilità:
+\begin{itemize}
+	\item \textbf{+1} in caso di vittoria di A;
+	\item \textbf{0} in caso di pareggio;
+	\item \textbf{-1} in caso di sconfitta di A.
+\end{itemize}
+L'algoritmo dunque, lavorando ricorsivamente, per ogni nodo di un dato livello di profondità dell'albero, in base all'etichetta che questo possiede, verrà assegnato un valore di utilità pari al minimo (per nodi etichettati \texttt{MIN}) o il massimo (\texttt{MAX}) dei valori di utilità dei nodi figli, come mostrato in Figura~\ref{values} (il valore di utilità del giocatore "O" ha un valore di utilità -1, mentre quello per il giocatore "x" +1), dove il nodo radice possiede l'etichetta \texttt{MIN}.
+
+\image{0.5}{minimaxvalues}{Etichette dei nodi nell'albero mostrato in Figura~\ref{tree}}{values}
+
+L'algoritmo \texttt{Minimax} risulta essere \textit{completo} nel caso in cui il gioco arriva sempre ad un termine (avitando situazioni di stallo), perché analizza tutti gli scenari possibili, e dunque risulta anche essere \textit{ottimo}.\\
+Considerando \textit{b} come il fattore di branching dell'albero ed \textit{m} il numero massimo di mosse per concludere una partita, l'algoritmo \texttt{Minimax} ha complessità in tempo \comp{b^m} e complessità in spazio di \comp{bm}.
+
+Non è il caso di\tic, ma in alcuni giochi l'algoritmo \texttt{Minimax} può portare alla creazione di alberi molto grandi, chiedendo un tempo di esecuzione non accettabile.
+
+Per superare questo inconveniente si applica inizialmente la tecnica dell'\texttt{$\alpha-\beta$ pruning} che consiste nel potare i "rami" dell'albero che portano a mosse non migliori di quelle già trovate. Nell'esempio a Figura~\ref{values}, l'algoritmo, che sta calcolando i valori di utilità dei nodi figli della radice, dopo aver calcolato il valore di utilità del nodo figlio più a destra (X) e di quello al centro (O), eviterà poi di esplorare il sotto-albero del nodo figli di destra, dato che possiede un valore peggiore dei rami precedentemente analizzati. Questa tecnica può portare in caso di \textit{ordine perfetto} dei nodi un complessità in tempo di \comp{b^{\frac{m}{2}}}.
+	
+Un altro metodo per ridurre la complessità dell'algoritmo è quello di impostare un profondità massima dell'albero, impedendogli però così di non raggiungere sempre gli stadi finali del gioco, facendo perdere all'algoritmo le proprietà della \textit{completezza} e \textit{correttezza}.
+
+\section{Agente sviluppato in Haskell}
+\subsection{Breve introduzione ad Haskell}
+Per comprendere il funzionamento dell'agente, si basti sapere del linguaggio \textit{Haskell\footnote{\url{https://en.wikipedia.org/wiki/Haskell_(programming_language)}}} è un linguaggio \textit{funzionale puro} ed utilizza la \textit{lazy evaluation}. Un linguaggio funzionale prevede la creazione solo di funzioni, perciò non vengono utilizzate variabili o oggetti di alcun tipo. La lazy evaluation prevede invece di valutare i parametri di una funzione non subito, ma solo quando questi vengono utilizzati nel corpo della funzione, come mostrato nella derivazione~\ref{lazy} di \texttt{inc n = n + 1}, a differenza della più usata \textit{eager evaluation} che valuta prima tutti i parametri di una funzione prima di eseguirla, come mostrato nella derivazione~\ref{eager}.
+
+\begin{equation}
+\label{lazy}
+inc (2*3) \rightarrow (2*3)+1 \rightarrow 6+1 \rightarrow 7
+\end{equation}
+
+\begin{equation}
+\label{eager}
+	inc (2*3) \rightarrow inc~6 \rightarrow 6+1 \rightarrow 7
+\end{equation}
+
+\subsection{Sviluppo dell'agente}
+L'agente è stato sviluppato seguendo le indicazioni del \href{https://www.cs.nott.ac.uk/~pszgmh/pih.html}{libro di testo} del corso \textit{Functional Languages}.
+
+L'agente è suddiviso in 7 moduli presenti in 7 file differenti:
+\begin{itemize}
+	\item \textbf{Type.hs} : contiene tutte le definizioni delle tipi utilizzati dall'agente, le più importanti sono
+	\begin{itemize}
+		\item \texttt{Player} : dato che indica il giocatore, può dunque assumere il valore X, O oppure B (blank) per indicare una casella della griglia vuota. Per il buon funzionamento dell'algoritmo \texttt{Minimax}, dato che il computer gioca sempre come X, ai giocatori è stato dato l'ordine $O<B<X$;
+		\item \texttt{Grid} : una matrice $3x3$ di \textit{Player};
+		\item \texttt{Tree} : struttura necessaria per l'algoritmo \texttt{Minimax}, dove ogni nodo possiede un valore ed una lista di nodi figli; le foglie sono dunque in nodi che possiedo una lista vuota di nodi figli;
+	\end{itemize}
+	\item \textbf{GridUtilities.hs} : contiene una serie di funzioni utili per gestire la griglia di gioco, come la creazione di una griglia vuota;
+	\item \textbf{DisplayGrid.hs} : contiene le funzioni necessarie per stampare nel terminale la griglia che durante lo svolgimento del gioco cambia;
+	\begin{lstlisting}
+	   |   |   
+	 X |   | O
+	   |   |
+	-----------
+	   |   |   
+	 X | O | 
+	   |   |
+	-----------
+	   |   |   
+	 O |   | 
+	   |   |
+	\end{lstlisting}
+	\item \textbf{PromptUtilities.hs} : modulo con funzioni, che in ausilio col modulo \textit{DisplayGrid}, contiene gestiscono l'interazione attraverso il prompt del giocatore col computer;
+	\item \textbf{MoveUtilities.hs} : modulo con le funzioni che modificano restituiscono la griglia risultante dopo una determinata mossa, e la funzione \texttt{moves} che data una griglia ed un \textit{Player}, restituisce tutte le possibili mosse del giocatore indicato. Tale funzione è fondamentale per costruire l'albero usato dall'algoritmo \texttt{Minimax};
+	\item \textbf{Minimax.hs} : modulo centrale per il funzionamento dell'agente. Tale modulo contiene le funzioni per eseguire l'algoritmo \texttt{Minimax} con $\alpha-\beta$ pruning in due versioni differenti
+	\begin{itemize}
+		\item \textbf{miniman} : versione dell'algoritmo che risulta essere una semplice traduzione dello pseudo-codice mostrato in Figura~\ref{minimax} e dunque restituisce per ogni nodo dell'albero il valore di utilità del suo sotto-albero;
+		\item \textbf{minimaxPruning} : versione modificata della funzione \textit{minimax} che prevede l'utilizzo della tecnica dell'$\alpha-\beta$ pruning;
+		\image{0.5}{minimax}{Pseudo-codice dell'algoritmo minimax}{minimax} 
+	\end{itemize}
+	entrambe queste funzioni vengono chiamate dalla funzione \texttt{bestmove} che ricevendo una lista di nodi col proprio valore di utilità e il \textit{Player} che deve muovere, scorre la lista finché non trova un valore di utilità pari al valore del \textit{Player} dato. La funzione \texttt{bestmove} si occupa anche di limitare la profondità dell'albero grazie alla funzione \textit{prune}, la quale data una profondità ed un albero, "taglia" quest'ultimo alla profondità indicata;
+	\item \textbf{TicTacToe.hs} : modulo principale che possiede la funzione \texttt{main} per avviare l'agente e la funzione \texttt{tictactuo} per giocare con un'altra persona.
+\end{itemize}
+
+Per poter giocare a \tic con l'agente o con un altro giocatore le mosse devono essere date attraverso un intero da 0 a 9 nel seguente modo:
+\begin{lstlisting}
+0|1|2
+-----
+3|4|5
+-----
+6|7|8
+\end{lstlisting}
+
+\subsection{Utilizzo della Lazy evaluation}
+In primo luogo la \textit{lazy evaluation} risulta utile nel momento in cui si effettua il taglio in profondità dell'albero, infatti, grazie alla lazy evaluation, non viene tagliato un albero già più profondo della profondità indicata, ma quest'ultimo viene creato fino a che la profondità indicata nella funzione \texttt{prune} non viene raggiunta.
+
+Un altro aspetto che interessante che porta la lazy evaluation si può vedere nella funzione \texttt{bestmove}, che come detto prima analizza in modo iterativo i sotto-alberi di un nodo contenuti in una lista, fermando l'analisi nel momento in cui trova il valore desiderato. La funzione, dato che è lazy, non calcola tutti i sotto-alberi per poi analizzarli iterativamente, bensì calcola il valore del primo sotto-albero e se questo non restituisce il valore desiderato calcola quello successivo, altrimenti la funzione si ferma. Questo è esattamente il procedimento che prevede la tecnica $\alpha-\beta$ pruning, che grazie alla lazy evaluation si ottiene in automatico. Infatti, le prestazioni dell'agente utilizzando le funzioni \texttt{minimax} e \texttt{minimaxPruning} sono uguali.
+
+\begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		& \texttt{minimax} & \texttt{minimaxPruning}\\
+		\hline
+		Tempo di esecuzione 1\^ mossa (s) & 6.823 & 6.927\\
+		Tempo di esecuzione 2\^ mossa (s) & 0.118 & 0.135\\
+		Tempo di esecuzione 3\^ mossa (s) & 0.011 & 0.011\\
+		Memoria utilizzata (GB) & 1.36 & 1.39\\
+		\hline
+	\end{tabular}
+\end{center} 
+	
+\end{document}

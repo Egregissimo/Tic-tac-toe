@@ -1,0 +1,47 @@
+normale:
+Computation time move 3: 0.000 sec
+Computation time move 2: 0.188 sec
+Computation time move 1: 7.562 sec
+(36.88 secs, 1,331,735,824 bytes) 1.33 GB
+
+Computation time move 4: 0.016 sec
+Computation time move 3: 0.016 sec
+Computation time move 2: 0.156 sec
+Computation time move 1: 6.016 sec
+(29.79 secs, 1,335,859,832 bytes) 1.33 GB
+
+Computation time move 4: 0.000 sec
+Computation time move 3: 0.016 sec
+Computation time move 2: 0.094 sec
+Computation time move 1: 6.891 sec
+(29.27 secs, 1,435,886,104 bytes) 1.43 GB
+
+media:
+mossa 1 -> 6.823 sec
+mossa 2 -> 0.118 sec
+mossa 3 -> 0.011 sec
+memoria 1.36 GB
+
+pruning:
+Computation time move 3: 0.000 sec
+Computation time move 2: 0.156 sec
+Computation time move 1: 7.406 sec
+(20.85 secs, 1,476,621,296 bytes)
+
+Computation time move 4: 0.000 sec
+Computation time move 3: 0.016 sec
+Computation time move 2: 0.141 sec
+Computation time move 1: 6.703 sec
+(21.95 secs, 1,345,657,816 bytes)
+
+Computation time move 4: 0.000 sec
+Computation time move 3: 0.016 sec
+Computation time move 2: 0.109 sec
+Computation time move 1: 6.672 sec
+(20.74 secs, 1,345,565,312 bytes)
+
+media:
+mossa 1 -> 6.927 sec
+mossa 2 -> 0.135 sec
+mossa 3 -> 0.011 sec
+memoria 1.39 GB
