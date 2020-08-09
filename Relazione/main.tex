@@ -70,7 +70,7 @@ Alle configurazioni finali (le foglie dell'albero) viene poi assegnato un valore
 	\item \textbf{0} in caso di pareggio;
 	\item \textbf{-1} in caso di sconfitta di A.
 \end{itemize}
-L'algoritmo dunque, lavorando ricorsivamente, per ogni nodo di un dato livello di profondità dell'albero, in base all'etichetta che questo possiede, verrà assegnato un valore di utilità pari al minimo (per nodi etichettati \texttt{MIN}) o il massimo (\texttt{MAX}) dei valori di utilità dei nodi figli, come mostrato in Figura~\ref{values} (il valore di utilità del giocatore "O" ha un valore di utilità -1, mentre quello per il giocatore "x" +1), dove il nodo radice possiede l'etichetta \texttt{MIN}.
+L'algoritmo dunque, lavorando ricorsivamente, per ogni nodo di un dato livello di profondità dell'albero, in base all'etichetta che questo possiede, verrà assegnato un valore di utilità pari al minimo (per nodi etichettati \texttt{MIN}) o il massimo (\texttt{MAX}) dei valori di utilità dei nodi figli, come mostrato in Figura~\ref{values} (il valore di utilità del giocatore ``O" ha un valore di utilità -1, mentre quello per il giocatore ``X" +1), dove il nodo radice possiede l'etichetta \texttt{MIN}.
 
 \image{0.5}{minimaxvalues}{Etichette dei nodi nell'albero mostrato in Figura~\ref{tree}}{values}
 
@@ -79,7 +79,7 @@ Considerando \textit{b} come il fattore di branching dell'albero ed \textit{m} i
 
 Non è il caso di\tic, ma in alcuni giochi l'algoritmo \texttt{Minimax} può portare alla creazione di alberi molto grandi, chiedendo un tempo di esecuzione non accettabile.
 
-Per superare questo inconveniente si applica inizialmente la tecnica dell'\texttt{$\alpha-\beta$ pruning} che consiste nel potare i "rami" dell'albero che portano a mosse non migliori di quelle già trovate. Nell'esempio a Figura~\ref{values}, l'algoritmo, che sta calcolando i valori di utilità dei nodi figli della radice, dopo aver calcolato il valore di utilità del nodo figlio più a destra (X) e di quello al centro (O), eviterà poi di esplorare il sotto-albero del nodo figli di destra, dato che possiede un valore peggiore dei rami precedentemente analizzati. Questa tecnica può portare in caso di \textit{ordine perfetto} dei nodi un complessità in tempo di \comp{b^{\frac{m}{2}}}.
+Per superare questo inconveniente si applica inizialmente la tecnica dell'\texttt{$\alpha-\beta$ pruning} che consiste nel potare i ``rami" dell'albero che portano a mosse non migliori di quelle già trovate. Nell'esempio a Figura~\ref{values}, l'algoritmo, che sta calcolando i valori di utilità dei nodi figli della radice, dopo aver calcolato il valore di utilità del nodo figlio più a destra (X) e di quello al centro (O), eviterà poi di esplorare il sotto-albero del nodo figli di destra, dato che possiede un valore peggiore dei rami precedentemente analizzati. Questa tecnica può portare in caso di \textit{ordine perfetto} dei nodi un complessità in tempo di \comp{b^{\frac{m}{2}}}. Per ordine perfetto s'intende lo scenario in cui i livelli etichettati con \texttt{MAX} hanno i valori di utilità dei nodi figli in ordine decrescente, mentre in nodi etichettati con \texttt{MIN} hanno i nodi figli coi valori di utilità in ordine crescente.
 	
 Un altro metodo per ridurre la complessità dell'algoritmo è quello di impostare un profondità massima dell'albero, impedendogli però così di non raggiungere sempre gli stadi finali del gioco, facendo perdere all'algoritmo le proprietà della \textit{completezza} e \textit{correttezza}.
 
@@ -131,7 +131,7 @@ L'agente è suddiviso in 7 moduli presenti in 7 file differenti:
 		\item \textbf{minimaxPruning} : versione modificata della funzione \textit{minimax} che prevede l'utilizzo della tecnica dell'$\alpha-\beta$ pruning;
 		\image{0.5}{minimax}{Pseudo-codice dell'algoritmo minimax}{minimax} 
 	\end{itemize}
-	entrambe queste funzioni vengono chiamate dalla funzione \texttt{bestmove} che ricevendo una lista di nodi col proprio valore di utilità e il \textit{Player} che deve muovere, scorre la lista finché non trova un valore di utilità pari al valore del \textit{Player} dato. La funzione \texttt{bestmove} si occupa anche di limitare la profondità dell'albero grazie alla funzione \textit{prune}, la quale data una profondità ed un albero, "taglia" quest'ultimo alla profondità indicata;
+	entrambe queste funzioni vengono chiamate dalla funzione \texttt{bestmove} che ricevendo una lista di nodi col proprio valore di utilità e il \textit{Player} che deve muovere, scorre la lista finché non trova un valore di utilità pari al valore del \textit{Player} dato. La funzione \texttt{bestmove} si occupa anche di limitare la profondità dell'albero grazie alla funzione \textit{prune}, la quale data una profondità ed un albero, ``taglia" quest'ultimo alla profondità indicata;
 	\item \textbf{TicTacToe.hs} : modulo principale che possiede la funzione \texttt{main} per avviare l'agente e la funzione \texttt{tictactuo} per giocare con un'altra persona.
 \end{itemize}
 
